@@ -242,19 +242,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60a83d12ce5a6143a4bac8cda069e6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IntValue: 0
-  floatValue: 0
-  stringValue: 
-  vecValue: {x: 0, y: 0, z: 0}
-  IntArray: 
+  IntValue: 122
+  floatValue: 22
+  stringValue: I am Class Basic
+  vecValue: {x: 0.2, y: 0.1, z: 0.1}
+  IntArray: fffffffffefffffffdffffff
   classTest:
-    IntValue: 0
-    floatValue: 0
-    stringValue: 
-    vecValue: {x: 0, y: 0, z: 0}
+    IntValue: 4
+    floatValue: 6
+    stringValue: zzzzzzz
+    vecValue: {x: -1, y: 0, z: 0}
   SerializeFieldFloat: 0
   IntValue_B: 0
-  Class_Array: []
+  Class_Array:
+  - IntValue: 1
+    floatValue: 22
+    stringValue: Test Class Array
+    vecValue: {x: 1, y: 0, z: 1}
 --- !u!4 &133776793
 Transform:
   m_ObjectHideFlags: 0
@@ -383,9 +387,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IntValue: 122
   floatValue: 22
-  stringValue: I am Class Other
+  stringValue: I am Class Basic
   vecValue: {x: 0.2, y: 0.1, z: 0.1}
-  Class_Array: []
+  Class_Array:
+  - IntValue: 1
+    floatValue: 22
+    stringValue: Test Class Array
+    vecValue: {x: 1, y: 0, z: 1}
 --- !u!4 &1870738171
 Transform:
   m_ObjectHideFlags: 0
@@ -431,19 +439,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IntValue: 122
   floatValue: 22
-  stringValue: I am Class C
+  stringValue: I am Class Basic
   vecValue: {x: 0.2, y: 0.1, z: 0.1}
-  IntArray: fffffffffefffffffeffffff
+  IntArray: fffffffffefffffffdffffff
   classTest:
     IntValue: 4
     floatValue: 6
-    stringValue: sdfsdfdsf
+    stringValue: zzzzzzz
     vecValue: {x: -1, y: 0, z: 0}
   SerializeFieldFloat: 0
   SerializeFieldFloat_A: 0
   IntValue_A: 0
   strintValue_C: 
-  Class_Array: []
+  Class_Array:
+  - IntValue: 1
+    floatValue: 3333
+    stringValue: Test Class Array
+    vecValue: {x: 1, y: 0, z: 1}
 --- !u!4 &1968798663
 Transform:
   m_ObjectHideFlags: 0

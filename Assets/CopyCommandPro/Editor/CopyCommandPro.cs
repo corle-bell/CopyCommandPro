@@ -11,7 +11,10 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace UnityEditor
 {
@@ -51,25 +54,90 @@ namespace UnityEditor
                 || CopyCommandHelper.FieldInfoTarget==null
                 || CopyCommandHelper.FieldInfos==null) return;
             if(CopyCommandHelper.FieldInfoTarget==component)return;
+
+            if (CopyCommandHelper.FieldInfoTarget.GetType()==component.GetType())
+            {
+                EditorUtility.CopySerialized(CopyCommandHelper.FieldInfoTarget, component);
+            }
+            else
+            {
+                SetFieldInfos(CopyCommandHelper.FieldInfos, component, CopyCommandHelper.FieldInfoTarget);
+            }
             
-            SetFieldInfos(CopyCommandHelper.FieldInfos, component, CopyCommandHelper.FieldInfoTarget);
             CopyCommandHelper.FieldInfoTarget = null;
+            CopyCommandHelper.FieldInfos.Clear();
             CopyCommandHelper.FieldInfos = null;
             
             EditorUtility.SetDirty(component);
         }
+
+        private static object CreateInstance(object src)
+        {
+            Type type = src.GetType();
+            object retval = null;
+
+            try
+            {
+                ConstructorInfo[] constructors = type.GetConstructors();
+
+                for (int i = 0; i < constructors.Length; i++)
+                {
+                    var p = constructors[i].GetParameters();
+                    if (p==null || p.Length==0)
+                    {
+                        retval = Activator.CreateInstance(type);
+                        return retval;
+                    }
+                }
+
+                // 手动调用构造函数并传递参数
+                ConstructorInfo constructor = constructors[0];
+                ParameterInfo[] paramsInfos = constructor.GetParameters();
+                object[] parameters = new object [paramsInfos.Length];
+
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    parameters[i] = paramsInfos[i].ParameterType.IsClass
+                        ? null
+                        : Activator.CreateInstance(paramsInfos[i].ParameterType);
+                }
+
+                if (constructor != null)
+                {
+                    retval = constructor.Invoke(parameters);
+                }
+                else
+                {
+                    // 处理找不到合适构造函数的情况  
+                }
+            }
+            catch (Exception e)
+            {
+                
+            }
+            
+            return retval;
+        }
         
         private static object DeepCopy(object obj)
         {
+            var objType = obj.GetType();
             //如果是字符串或值类型则直接返回
-            if (obj is string || obj.GetType().IsValueType) return obj;
+            if (obj is string || objType.IsValueType) return obj;
             
-            object retval = Activator.CreateInstance(obj.GetType());
-            FieldInfo[] fields = obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            object retval = CreateInstance(obj);
+            
+            FieldInfo[] fields = objType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             foreach (FieldInfo field in fields)
             {
-                try { field.SetValue(retval, DeepCopy(field.GetValue(obj))); }
-                catch { }
+                try
+                {
+                    EditorUtility.CopySerializedManagedFieldsOnly(field.GetValue(obj), retval);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                }
             }
             return retval;
         }
@@ -85,9 +153,19 @@ namespace UnityEditor
                 var type = arr.GetValue(0).GetType();
                 Array ret = Array.CreateInstance(type, arr.Length);
                 
-                for (int i = 0; i < arr.Length; i++)
+                if (type.IsClass && !isSerializable(type))
                 {
-                    ret.SetValue(DeepCopy(arr.GetValue(i)), i);
+                    for (int i = 0; i < arr.Length; i++)
+                    {
+                        ret.SetValue(arr.GetValue(i), i);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < arr.Length; i++)
+                    {
+                        ret.SetValue(DeepCopy(arr.GetValue(i)), i);
+                    }
                 }
                 
                 return ret;
